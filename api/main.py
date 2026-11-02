@@ -1,19 +1,27 @@
+
 import os
+from functools import lru_cache
+
 import mlflow
 import pandas as pd
 
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
+
 # Connect to our MLflow tracking server
 mlflow.set_tracking_uri(
     os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
 )
 
-# Load registered model version 1
-model = mlflow.pyfunc.load_model(
-    "models:/ride-fare-predictor/1"
-)
+
+@lru_cache(maxsize=1)
+def get_model():
+    """Load the registered model once and reuse it."""
+    return mlflow.pyfunc.load_model(
+        "models:/ride-fare-predictor/1"
+    )
+
 
 app = FastAPI(
     title="Ride Fare Prediction API",
@@ -22,13 +30,11 @@ app = FastAPI(
 )
 
 
-
 class TripRequest(BaseModel):
     trip_distance: float = Field(gt=0, le=100)
     trip_duration: float = Field(gt=0, le=180)
     pickup_hour: int = Field(ge=0, le=23)
     passenger_count: float = Field(ge=1, le=8)
-
 
 
 @app.get("/")
@@ -45,6 +51,7 @@ def predict_fare(request: TripRequest):
         "passenger_count": request.passenger_count
     }])
 
+    model = get_model()
     prediction = model.predict(input_data)
 
     return {

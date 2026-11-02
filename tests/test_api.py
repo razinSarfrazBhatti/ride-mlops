@@ -1,8 +1,16 @@
+
 from fastapi.testclient import TestClient
 
 from api.main import app
 
 client = TestClient(app)
+
+
+class FakeModel:
+    """A lightweight substitute for the real ML model."""
+
+    def predict(self, input_data):
+        return [21.73]
 
 
 def test_health_check():
@@ -12,7 +20,13 @@ def test_health_check():
     assert response.json()["status"] == "healthy"
 
 
-def test_valid_fare_prediction():
+def test_valid_fare_prediction(monkeypatch):
+    # Replace the real model loader with our fake model
+    monkeypatch.setattr(
+        "api.main.get_model",
+        lambda: FakeModel()
+    )
+
     response = client.post(
         "/predict",
         json={
@@ -24,7 +38,7 @@ def test_valid_fare_prediction():
     )
 
     assert response.status_code == 200
-    assert "predicted_fare" in response.json()
+    assert response.json()["predicted_fare"] == 21.73
     assert response.json()["currency"] == "USD"
 
 
