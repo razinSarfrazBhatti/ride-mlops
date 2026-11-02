@@ -1,0 +1,47 @@
+services:
+
+  mlflow:
+    image: python:3.9-slim
+    container_name: ride-mlflow
+    working_dir: /app
+    volumes:
+      - ./mlruns:/home/hassan/Downloads/ride-mlops/mlruns
+    command: >
+      sh -c "pip install --no-cache-dir mlflow==3.1.4 &&
+      mlflow server
+      --backend-store-uri file:///home/hassan/Downloads/ride-mlops/mlruns
+      --host 0.0.0.0
+      --port 5000"
+    ports:
+      - "5000:5000"
+    networks:
+      - ride-network
+
+  ml-api:
+    image: ride-fare-api:v2
+    container_name: ride-ml-api
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes:
+      - ./mlruns:/home/hassan/Downloads/ride-mlops/mlruns
+    depends_on:
+      - mlflow
+    ports:
+      - "8000:8000"
+    networks:
+      - ride-network
+
+  go-backend:
+    build:
+      context: ./go-backend
+    container_name: ride-go-backend
+    depends_on:
+      - ml-api
+    ports:
+      - "8081:8081"
+    networks:
+      - ride-network
+
+networks:
+  ride-network:
+    driver: bridge
