@@ -17,8 +17,16 @@ services:
       - ride-network
 
   ml-api:
-    image: ghcr.io/razinsarfrazbhatti/ride-fare-api:v4
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ride-fare-api:external-model
     container_name: ride-ml-api
+    environment:
+      MODEL_STORE: /models
+      MODEL_VERSION: "2"
+    volumes:
+      - ./deployment/model-store:/models:ro
     ports:
       - "8000:8000"
     networks:

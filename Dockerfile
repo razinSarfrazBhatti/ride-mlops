@@ -8,10 +8,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY api/ ./api/
 
-# Include the exported MLflow model
-COPY deployment/model/ ./model/
-
-ENV MODEL_PATH=/app/model
+ENV MODEL_STORE=/models
+ENV MODEL_VERSION=1
 
 EXPOSE 8000
 
