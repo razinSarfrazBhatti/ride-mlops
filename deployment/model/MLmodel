@@ -1,0 +1,22 @@
+artifact_path: file:///home/hassan/Downloads/ride-mlops/mlruns/205031508921283279/models/m-0ac77e0cee9c485aa7c713985ba97b94/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.9.25
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.6.1
+mlflow_version: 3.1.4
+model_id: m-0ac77e0cee9c485aa7c713985ba97b94
+model_size_bytes: 1302094
+model_uuid: m-0ac77e0cee9c485aa7c713985ba97b94
+prompts: null
+run_id: ec65fa758ab8429e84f90419a4dfd1db
+utc_time_created: '2026-11-02 06:46:04.753290'

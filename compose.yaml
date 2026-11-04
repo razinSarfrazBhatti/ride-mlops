@@ -1,5 +1,4 @@
 services:
-
   mlflow:
     image: python:3.9-slim
     container_name: ride-mlflow
@@ -18,22 +17,15 @@ services:
       - ride-network
 
   ml-api:
-    image: ride-fare-api:v2
+    image: ghcr.io/razinsarfrazbhatti/ride-fare-api:v4
     container_name: ride-ml-api
-    environment:
-      MLFLOW_TRACKING_URI: http://mlflow:5000
-    volumes:
-      - ./mlruns:/home/hassan/Downloads/ride-mlops/mlruns
-    depends_on:
-      - mlflow
     ports:
       - "8000:8000"
     networks:
       - ride-network
 
   go-backend:
-    build:
-      context: ./go-backend
+    image: ghcr.io/razinsarfrazbhatti/ride-go-backend:latest
     container_name: ride-go-backend
     depends_on:
       - ml-api

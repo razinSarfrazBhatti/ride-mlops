@@ -30,3 +30,5 @@ mlruns/
 
 # OS
 .DS_Store
+
+!deployment/model/model.pkl
