@@ -4,11 +4,11 @@ services:
     container_name: ride-mlflow
     working_dir: /app
     volumes:
-      - ./mlruns:/home/hassan/Downloads/ride-mlops/mlruns
+      - ./mlruns:/mlruns
     command: >
       sh -c "pip install --no-cache-dir mlflow==3.1.4 &&
       mlflow server
-      --backend-store-uri file:///home/hassan/Downloads/ride-mlops/mlruns
+      --backend-store-uri file:///mlruns
       --host 0.0.0.0
       --port 5000"
     ports:
@@ -17,10 +17,7 @@ services:
       - ride-network
 
   ml-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ride-fare-api:external-model
+    image: ghcr.io/razinsarfrazbhatti/ride-fare-api:latest
     container_name: ride-ml-api
     environment:
       MODEL_STORE: /models
