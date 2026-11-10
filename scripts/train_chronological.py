@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import mlflow
+import mlflow.sklearn
 
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
@@ -99,7 +100,7 @@ for name, metrics in results.items():
 
 mlflow.set_experiment("ride-fare-prediction")
 
-with mlflow.start_run(run_name="chronological-evaluation-1m"):
+with mlflow.start_run(run_name="chronological-evaluation-1m") as run:
     mlflow.log_params({
         "training_period": "2025-01-01 to 2025-01-20",
         "validation_period": "2025-01-21 to 2025-01-25",
@@ -118,8 +119,23 @@ with mlflow.start_run(run_name="chronological-evaluation-1m"):
                 for metric, value in values.items()
             })
 
+    # Save the Random Forest trained only on Jan 1-20 so later
+    # monitoring can score it on periods it has never seen.
+    print("\nLogging Random Forest model to MLflow (large artifact)...")
+    model_info = mlflow.sklearn.log_model(
+        rf_model,
+        name="chronological-rf"
+    )
+
+    run_id = run.info.run_id
+
+results["run_id"] = run_id
+results["model_uri"] = model_info.model_uri
+
 with open("data/chronological_results.json", "w") as file:
     json.dump(results, file, indent=4)
 
+print(f"\nMLflow run ID: {run_id}")
+print(f"Model URI:     {model_info.model_uri}")
 print("\nResults logged to MLflow.")
 print("Saved to data/chronological_results.json")
