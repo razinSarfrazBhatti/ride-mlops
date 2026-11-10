@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 
 INPUT_FILE = "data/yellow_tripdata_2025-01.parquet"
@@ -6,6 +8,11 @@ SAMPLE_SIZE = 1_000_000
 RANDOM_STATE = 42
 
 print("Loading original Parquet dataset...")
+
+if not Path(INPUT_FILE).is_file():
+    raise FileNotFoundError(
+        f"Input dataset not found: {INPUT_FILE}. Download the Parquet file first."
+    )
 
 df = pd.read_parquet(
     INPUT_FILE,
@@ -50,6 +57,9 @@ df["passenger_count"] = df["passenger_count"].fillna(
     df["passenger_count"].median()
 )
 
+if df["passenger_count"].isna().any():
+    raise ValueError("Passenger counts are all missing; cannot fill missing values.")
+
 # Randomly select one million valid records
 df = df.sample(
     n=SAMPLE_SIZE,
@@ -67,12 +77,14 @@ df = df[
     ]
 ]
 
+output_path = Path(OUTPUT_FILE)
+output_path.parent.mkdir(parents=True, exist_ok=True)
 df.to_csv(OUTPUT_FILE, index=False)
 
 print("\n========== DATASET RESULTS ==========")
 print(f"Final records: {len(df):,}")
 print(f"Output file: {OUTPUT_FILE}")
-print(f"File size: {pd.io.common.file_exists(OUTPUT_FILE)}")
+print(f"File size: {output_path.stat().st_size / (1024 ** 2):.2f} MB")
 print("\nMissing values:")
 print(df.isnull().sum())
 print("\nStatistics:")
